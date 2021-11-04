@@ -33,10 +33,11 @@ def main():
         select(relName2, attName, opVal, val)
 
     elif funcName == '3':
-        relName2 = input("Enter relation name: ")
-        attName = input("Enter attribute name: ")
-        opVal = input("Enter operator value: ")
-        val = input("Enter value: ")
-        select(relName2, attName, opVal, val)
+
+        rel1 = input("Enter relation name1: ")
+        att1 = input("Enter attribute name1: ")
+        rel2 = input("Enter relation name2: ")
+        att2 = input("Enter attribute name2: ")
+        join(rel1, att1, rel2, att2)
 
 main()
