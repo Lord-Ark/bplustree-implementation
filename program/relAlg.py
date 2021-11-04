@@ -4,6 +4,23 @@ def select(rel, att, op, val):
 
     print("The Input Information is"+"Rel"+rel+' att- '+att+' op->'+op+' val->'+val)
 
+    """  < ,  <= , =,  > ,  >=                   op1 to op 5’"""
+    if(op=="<"):
+        print("function: op1")
+
+    elif (op == "<="):
+        print("function: op2")
+    elif (op == "="):
+        print("function: op3")
+    elif (op == ">"):
+        print("function:op4")
+    elif (op == ">="):
+        print("function: op5")
+
+
+
+    print("vale is" + val)
+
 def project(rel,attList):
     print(rel+' att- '+rel+' op->'+attList)
 
