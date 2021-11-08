@@ -1,5 +1,17 @@
 
-    
+
+def load_data_from_pageLink():
+    file_Products=open("../data/Products/pageLink.txt","r")
+    file_Suppliers = open("../data/Suppliers/pageLink.txt", "r")
+    file_Supply = open("../data/Supply/pageLink.txt", "r")
+    print(file_Products.read())
+    print(file_Suppliers.read())
+    print(file_Supply.read())
+
+
+
+
+
 def select(rel, att, op, val):
 
     print("The Input Information is"+"Rel"+rel+' att- '+att+' op->'+op+' val->'+val)
@@ -57,4 +69,7 @@ def main():
         att2 = input("Enter attribute name2: ")
         join(rel1, att1, rel2, att2)
 
-main()
+"""use this command after debug"""
+# main()
+
+load_data_from_pageLink()
