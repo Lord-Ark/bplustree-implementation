@@ -31,7 +31,7 @@ def build(rel, att, odd):
             if(leafNode == ''):                 # No tree found
                 npage = createLeafNode('L', rel, att, sk, skval, odd)
                 direcmain = read("../index/directory.txt")
-                direcmain.push([rel,att,npage]);
+                direcmain.append([rel,att,npage]);
                 write(direcmain,"../index.directory.txt")   # insert tree in directory
             else:
                 leafNodeData = read("../index/"+leafNode)
@@ -72,10 +72,10 @@ def findInTree(rel, att, sk):
 def insertinleafnode(leafNodeData, sk, skval):
     node = leafNodeData
     if(node.index(sk)):
-        node.value[:node.index(sk)].push(skval)
+        node.value[:node.index(sk)].append(skval)
     else:
-        node.key.push(sk)
-        node.value.push(skval)
+        node.key.append(sk)
+        node.value.append(skval)
 
     return
 
@@ -92,7 +92,7 @@ def createLeafNode(rel, att, sk, skval, odd):
     node.rightNode = None
     node.key = sk
     node.value = [skval]
-    node.value.push(node)
+    node.value.append(node)
     # create a leaf node and write the lpage in the indexfolder
     json.dumps(nodep)
     write(nodep, lpage)
@@ -111,7 +111,7 @@ def createInternalNode(rel, att, sk, ln, rn, odd):
     node.leftNode = ln
     node.rightNode = rn
     node.key = sk
-    node.value.push(node)
+    node.value.append(node)
     json.dumps(nodep)
     write(nodep, lpage)
     return lpage
