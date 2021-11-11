@@ -1,38 +1,90 @@
+import json;
 
 
-def load_data_from_pageLink():
-    file_Products=open("../data/Products/pageLink.txt","r")
-    file_Suppliers = open("../data/Suppliers/pageLink.txt", "r")
-    file_Supply = open("../data/Supply/pageLink.txt", "r")
-    print(file_Products.read())
-    print(file_Suppliers.read())
-    print(file_Supply.read())
+def read(path):
+    f = open(path)
+    return json.load(f)
+
+def findLocationOfAtrrInTupple(rel, att):
+    schema = read("../data/schemas.txt")
+    for item in schema:
+        if (item[0] == str.capitalize(rel) and item[1] == att):
+            return item[3]
 
 
-
-
+def check_if_use_B_tree():
+    # write a function to check if use B+ tree
+    result=None
+    return result
 
 def select(rel, att, op, val):
 
-    print("The Input Information is"+"Rel"+rel+' att- '+att+' op->'+op+' val->'+val)
-
-    """  < ,  <= , =,  > ,  >=                   op1 to op 5’"""
-    if(op=="<"):
-        print("function: op1")
-
-    elif (op == "<="):
-        print("function: op2")
-    elif (op == "="):
-        print("function: op3")
-    elif (op == ">"):
-        print("function:op4")
-    elif (op == ">="):
-        print("function: op5")
+    array: list=[]
 
 
 
-    print("vale is" + val)
 
+
+
+
+    file_Suppliers = read("../data/Suppliers/pageLink.txt")
+    file_Supply = read("../data/Supply/pageLink.txt")
+
+    pos = findLocationOfAtrrInTupple("Products",att)
+    if(rel=="Products"):
+        file_Products = read("../data/Products/pageLink.txt")
+        for i in range(len(file_Products)):
+
+            pagedata= read("../data/Products/"+file_Products[i])
+            for j in range(len(pagedata)):
+                Tuples=pagedata[j]
+                valueforcom = Tuples[pos]
+                if(op == '='):
+                    if(valueforcom == val):
+                        array.append(Tuples)
+                if(op == '>='):
+                    if(valueforcom >= val):
+                        array.append(Tuples)
+                if(op == '<='):
+                    if(valueforcom <= val ):
+                        array.append(Tuples)
+
+                if (op == '<'):
+                    if (valueforcom < val):
+                        array.append(Tuples)
+                if (op == '>'):
+                    if (valueforcom > val):
+                        array.append(Tuples)
+
+
+
+
+                #pageNumber_in_Tuples=Tuples[0]
+                #val_in_Tuples=Tuples[1]
+                #att_in_Tuples=Tuples[2]
+                #if((val_in_Tuples==val) and (att_in_Tuples==att)):
+                #    value=pageNumber_in_Tuples
+
+
+
+
+
+
+
+
+
+
+    # if use B+ tree, print att+op+val+rel+val
+    if(pos!=None):
+        print("With B+_tree, the cost of searching "+att+" "+op+" "+val+" on "+rel +" is " + array+"  pages")
+
+
+    # if not use B+ tree, print att+op+val+rel+val
+    else:
+        print("Without B+_tree the cost of searching"+att+op+val+"on"+rel+"is"+array+"pages")
+
+
+#
 def project(rel,attList):
     print(rel+' att- '+rel+' op->'+attList)
 
@@ -71,5 +123,7 @@ def main():
 
 """use this command after debug"""
 # main()
-
-load_data_from_pageLink()
+select("Products","pname","=","drill")
+#output > array[['p03','drill','black'],['p05','drill','green']]
+select("Products","pid","=","p05")
+#output > array [['p05','drill','green']]
