@@ -1,3 +1,5 @@
+from relAlg import project,select,join
+
 def main():
     funcName = input(
         "enter the function(number) you want to call: \n 1. Project \n 2. Select \n 3. Join \n  Enter Number: ")
