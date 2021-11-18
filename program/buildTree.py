@@ -102,7 +102,6 @@ def insertinleafnode(leafNodeData, sk, skval):
         node['nodevalue'].sort(key=lambda x: x.key)
         # node['value'][:node.index(sk)].append(skval)
         # insert in the node the key and value but in sorted manner
-        
 
     return node
 
