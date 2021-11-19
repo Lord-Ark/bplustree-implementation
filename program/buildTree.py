@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 
 def read(path):
@@ -26,22 +27,26 @@ def build(rel, att, odd):
         for j in range(len(page)):
             sk = page[j][pos]
             skval = pageArray[i]
-            leafNodeReturn =json.loads(findInTree(rel, att, sk)) 
+            leafNodeReturn = findInTree(rel, att, sk)
             leafNode = leafNodeReturn['page']
             if(leafNode == ''):                 # No tree found
-                nodeitem= {}
-                nodeitem['key']=sk
-                nodeitem['value']= sk
-                npage = createLeafNode( nodeitem, '' , odd)
+                nodeitem = {}
+                nodeitem['key'] = sk
+                nodeitem['value'] = sk
+                npage = createLeafNode([nodeitem], '', odd)
                 direcmain = read("../index/directory.txt")
                 direcmain.append([rel, att, npage])
+                print(direcmain)
                 # insert tree in directory
-                write(direcmain, "../index.directory.txt")
+                write(direcmain, "../index/directory.txt")
             else:
-                leafNodeData = read("../index/"+leafNode)
-                newleaf= insertinleafnode(leafNodeData, sk, skval)
-                if len(newleaf['nodevalue'])>(2*odd):  # if leaf node is full
-                    splittheleaf(newleaf,odd,rel)                    
+                leafNodeData = read("../index/"+leafNode['page'])
+                newleaf = insertinleafnode(leafNodeData, sk, skval)
+                if len(newleaf['nodevalue']) > (2*odd):  # if leaf node is full
+                    splittheleaf(newleaf, odd, rel)
+                else:
+                    print('writing in leaf')
+                    write(newleaf, "../index/"+newleaf['page'])
 
     return
 
@@ -70,20 +75,21 @@ def findInTree(rel, att, sk):
             rootpage = item[2]
     if(rootpage != ''):
         page = traverseInTree(rootpage, sk, traverseCost)
-        return json.dumps({'page': page, 'cost': traverseCost})
+        return {'page': page, 'cost': traverseCost}
     else:
-        return json.dumps({'page': rootpage, 'cost': traverseCost})
+        return {"page": rootpage, "cost": traverseCost}
 
 
-def findKeyInNode(node,sk):
+def findKeyInNode(node, sk):
     for nodeitem in node['nodevalue']:
         if(nodeitem['key'] == sk):
             return True
     return False
 
+
 def insertinleafnode(leafNodeData, sk, skval):
     node = leafNodeData
-    if(findKeyInNode(node,sk)):
+    if(findKeyInNode(node, sk)):
        # node['key']
         print('append in value ')
         # append value in the array where key = sk
@@ -95,27 +101,45 @@ def insertinleafnode(leafNodeData, sk, skval):
         # node.append(tempnode)
     else:
         print('insert in node')
-        tempnode ={}
+        tempnode = {}
         tempnode['key'] = sk
         tempnode['value'] = [skval]
         node['nodevalue'].append(tempnode)
-        node['nodevalue'].sort(key=lambda x: x.key)
+        node['nodevalue'].sort(key=lambda x: x['key'])
         # node['value'][:node.index(sk)].append(skval)
         # insert in the node the key and value but in sorted manner
 
     return node
 
-def insertininternalnode(internalnode, nodeitem):
-    node = internalnode
-    node['nodevalue'].append(nodeitem);
-    node['nodevalue'].sort(key=lambda x: x.key)
 
+def insertininternalnode(internalnode, nodeitem, odd, rel):
+    node = internalnode
+    node['nodevalue'].append(nodeitem)
+    node['nodevalue'].sort(key=lambda x: x.key)
+    # sort the nodevalue
+    if(node['nodevalue'] > (2*odd)):
+        print('split internal node')
+        # split the internal node
+        leftnode = node['nodevalue'][:odd]
+        parent = node['parent']
+        newLeftNode = node
+        newLeftNode['nodevalue'] = leftnode
+        write(newLeftNode, "../index/"+newLeftNode['page'])
+
+        rightnode = node['nodevalue'][-odd:]
+        npage = createInternalNode(rightnode, parent, odd)
+        copyToParent(node['nodevalue'][odd+1], parent,
+                     newLeftNode['page'], npage, rel, odd)
+    else:
+        write(node, "../index/"+node['page'])
 
     return node
 
-def createLeafNode( leafitems,parent, odd):
+
+def createLeafNode(leafitems, parent, odd):
     pagepool = read("../index/pagePool.txt")
     lpage = pagepool.pop()
+    write(pagepool,"../index/pagePool.txt")
     nodep = {}
     print('new leaf')
     nodep['page'] = lpage
@@ -128,13 +152,13 @@ def createLeafNode( leafitems,parent, odd):
         node['value'] = item['value']
         nodep['nodevalue'].append(node)
     # create a leaf node and write the lpage in the indexfolder
-    newnode = json.dumps(nodep)
-    write(newnode, lpage)
+    # newnode = json.dumps(nodep)
+    write(nodep, "../index/"+lpage)
     return lpage
     # create a internal node and write the lpage in the indexfolder
 
 
-def createInternalNode(rel, att, nodeitems, parent , odd):
+def createInternalNode(nodeitems, parent, odd):
     pagepool = read("../index/pagePool.txt")
     lpage = pagepool.pop()
     nodep = {}
@@ -149,39 +173,42 @@ def createInternalNode(rel, att, nodeitems, parent , odd):
         node['rightNode'] = item['rn']
         node['key'] = item['sk']
         nodep['nodevalue'].append(node)
-    newnode = json.dumps(nodep)
-    write(newnode, lpage)
+    # newnode = json.dumps(nodep)
+    write(nodep, "../index/"+lpage)
     return lpage
 
 
-def splittheleaf(leafNode,odd,rel):
+def splittheleaf(leafNode, odd, rel):
     #
     lstodd = odd+1
     leftleaf = leafNode['nodevalue'][:odd]
     parent = leafNode['parent']
-    newLeftLeaf = leafNode;
+    newLeftLeaf = leafNode
     newLeftLeaf['nodevalue'] = leftleaf
-    write(newLeftLeaf,newLeftLeaf['page'])
-    
+    write(newLeftLeaf, "../index/"+newLeftLeaf['page'])
+
     rightleaf = leafNode['nodevalue'][-lstodd:]
-    npage = createLeafNode( rightleaf,parent, odd)
+    npage = createLeafNode(rightleaf, parent, odd)
 
     copyElem = rightleaf['nodevalue'][0]['key']
-    
-    copyToParent(copyElem,parent,ln,rn,rel)
+
+    copyToParent(copyElem, parent, newLeftLeaf['page'], npage, rel, odd)
     return
 
-def copyToParent(elem,parent,rel):
+
+def copyToParent(elem, parent, ln, rn, rel, odd):
     inode = read('../data/'+rel+'/'+parent)
-    nodeitem={}
-    nodeitem['key']=elem;
-    nodeitem['leftNode']=
-    insertininternalnode
-    return;
+    nodeitem = {}
+    nodeitem['key'] = elem
+    nodeitem['leftNode'] = ln
+    nodeitem['rightNode'] = rn
+    insertininternalnode(inode, nodeitem, odd, rel)
+    return
+
 
 def write(text, page):
-    f = open(page, 'w')
-    f.write(json.dump(text))
+    with open(page, 'w') as f:
+        json.dump(text, f)
 
 
-# build('Products', 'pid', 2)
+build('Products', 'pid', 1)
