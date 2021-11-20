@@ -1,6 +1,10 @@
 import json
 from pathlib import Path
+import pdb
 
+relation = ''
+order = 1
+attribute = ''
 
 def read(path):
     f = open(path)
@@ -17,6 +21,13 @@ def findLocationOfAtrrInTupple(rel, att):
 
 
 def build(rel, att, odd):
+    pdb.set_trace()
+    global relation
+    relation = rel
+    global order
+    order = odd
+    global attribute
+    attribute = att
     pagelink = "../data/"+rel+"/pageLink.txt"
     pageArray = read(pagelink)              # read the pagelink file
     pos = findLocationOfAtrrInTupple(rel, att)
@@ -32,7 +43,7 @@ def build(rel, att, odd):
             if(leafNode == ''):                 # No tree found
                 nodeitem = {}
                 nodeitem['key'] = sk
-                nodeitem['value'] = sk
+                nodeitem['value'] = [skval]
                 npage = createLeafNode([nodeitem], '', odd)
                 direcmain = read("../index/directory.txt")
                 direcmain.append([rel, att, npage])
@@ -52,7 +63,7 @@ def build(rel, att, odd):
 
 
 def traverseInTree(pno, sk, traverseCost):
-
+    pdb.set_trace()
     page = read("../index/"+pno)
     traverseCost = traverseCost+1
     if(page['type'] == 'L'):
@@ -61,26 +72,29 @@ def traverseInTree(pno, sk, traverseCost):
         allval = page['nodevalue']
         for i in range(len(allval)):
             if(sk < allval[i]['key']):
-                traverseInTree(allval[i]['leftNode'], sk)
-            elif((sk >= allval[i]['key'] and sk < allval[i+1]['key']) or (sk >= allval[i]['key'] and i == len(allval)-1)):
-                traverseInTree(allval[i]['rightNode'], sk)
+                return traverseInTree(allval[i]['leftNode'], sk, traverseCost)
+            elif((sk >= allval[i]['key'] and i == len(allval)-1) or (sk >= allval[i]['key'] and sk < allval[i+1]['key'])):
+                return traverseInTree(allval[i]['rightNode'], sk, traverseCost)
 
 
 def findInTree(rel, att, sk):
+    pdb.set_trace()
     direc = read("../index/directory.txt")
     rootpage = ''
-    traverseCost = 0
+    traverseCost = 0    #not working
     for item in direc:
         if(item[0] == rel and item[1] == att):
             rootpage = item[2]
     if(rootpage != ''):
         page = traverseInTree(rootpage, sk, traverseCost)
+        print(page)
         return {'page': page, 'cost': traverseCost}
     else:
         return {"page": rootpage, "cost": traverseCost}
 
 
 def findKeyInNode(node, sk):
+    pdb.set_trace()
     for nodeitem in node['nodevalue']:
         if(nodeitem['key'] == sk):
             return True
@@ -88,6 +102,7 @@ def findKeyInNode(node, sk):
 
 
 def insertinleafnode(leafNodeData, sk, skval):
+    pdb.set_trace()
     node = leafNodeData
     if(findKeyInNode(node, sk)):
        # node['key']
@@ -112,24 +127,43 @@ def insertinleafnode(leafNodeData, sk, skval):
     return node
 
 
-def insertininternalnode(internalnode, nodeitem, odd, rel):
+def insertininternalnode(internalnode, nodeitem,ln,rn, odd, rel):
+    pdb.set_trace()
     node = internalnode
     node['nodevalue'].append(nodeitem)
-    node['nodevalue'].sort(key=lambda x: x.key)
+    node['nodevalue'].sort(key=lambda x: x['key'])
+    leftleaf = read('../index/'+ln)
+    leftleaf['parent'] = node['page']
+    write(leftleaf,'../index/'+ln)
+    rightleaf = read('../index/'+rn)
+    rightleaf['parent'] = node['page']
+    write(rightleaf,'../index/'+rn)
     # sort the nodevalue
-    if(node['nodevalue'] > (2*odd)):
+    if(len(node['nodevalue']) > (2*odd)):
         print('split internal node')
         # split the internal node
-        leftnode = node['nodevalue'][:odd]
-        parent = node['parent']
-        newLeftNode = node
-        newLeftNode['nodevalue'] = leftnode
-        write(newLeftNode, "../index/"+newLeftNode['page'])
+        source_list = node['nodevalue']
+        N = odd
+        new_left_list = []
+        for index in range(0, N):
+            new_left_list.append(source_list[index])
+        new_right_list = []
+        for index in range(N+1, len(node['nodevalue'])):
+            new_right_list.append(source_list[index])
 
-        rightnode = node['nodevalue'][-odd:]
-        npage = createInternalNode(rightnode, parent, odd)
-        copyToParent(node['nodevalue'][odd+1], parent,
-                     newLeftNode['page'], npage, rel, odd)
+        parent = node['parent']
+
+        leftinternal ={};
+        leftinternal['parent'] = parent
+        leftinternal['page']=node['page']
+        leftinternal['type'] ='I'
+        leftinternal['nodevalue']= new_left_list   
+        
+        write(leftinternal, "../index/"+node['page'])
+
+        npage = createInternalNode(new_right_list, parent, odd)
+
+        copyToParent(new_right_list[0]['key'], parent,node['page'], npage, rel, odd)
     else:
         write(node, "../index/"+node['page'])
 
@@ -137,6 +171,7 @@ def insertininternalnode(internalnode, nodeitem, odd, rel):
 
 
 def createLeafNode(leafitems, parent, odd):
+    pdb.set_trace()
     pagepool = read("../index/pagePool.txt")
     lpage = pagepool.pop()
     write(pagepool,"../index/pagePool.txt")
@@ -159,8 +194,10 @@ def createLeafNode(leafitems, parent, odd):
 
 
 def createInternalNode(nodeitems, parent, odd):
+    pdb.set_trace()
     pagepool = read("../index/pagePool.txt")
     lpage = pagepool.pop()
+    write(pagepool,"../index/pagePool.txt")
     nodep = {}
     print('new internal node')
     nodep['page'] = lpage
@@ -169,9 +206,9 @@ def createInternalNode(nodeitems, parent, odd):
     nodep['nodevalue'] = []
     for item in nodeitems:
         node = {}
-        node['leftNode'] = item['ln']
-        node['rightNode'] = item['rn']
-        node['key'] = item['sk']
+        node['leftNode'] = item['leftNode']
+        node['rightNode'] = item['rightNode']
+        node['key'] = item['key']
         nodep['nodevalue'].append(node)
     # newnode = json.dumps(nodep)
     write(nodep, "../index/"+lpage)
@@ -180,29 +217,65 @@ def createInternalNode(nodeitems, parent, odd):
 
 def splittheleaf(leafNode, odd, rel):
     #
-    lstodd = odd+1
-    leftleaf = leafNode['nodevalue'][:odd]
+    # lstodd = odd+1
+    pdb.set_trace()
+    source_list = leafNode['nodevalue']
+    N = odd
+    new_left_list = []
+    for index in range(0, N):
+        new_left_list.append(source_list[index])
+    new_right_list = []
+    for index in range(N, len(leafNode['nodevalue'])):
+        new_right_list.append(source_list[index])
+    
     parent = leafNode['parent']
-    newLeftLeaf = leafNode
-    newLeftLeaf['nodevalue'] = leftleaf
-    write(newLeftLeaf, "../index/"+newLeftLeaf['page'])
 
-    rightleaf = leafNode['nodevalue'][-lstodd:]
-    npage = createLeafNode(rightleaf, parent, odd)
+    leftleaf ={};
+    leftleaf['parent'] = leafNode['parent']
+    leftleaf['page']=leafNode['page']
+    leftleaf['type'] ='L'
+    leftleaf['nodevalue']= new_left_list
+    
+    write(leftleaf, "../index/"+leftleaf['page'])
 
-    copyElem = rightleaf['nodevalue'][0]['key']
+    # rightleaf = leafNode['nodevalue'][-lstodd:]
+    npage = createLeafNode(new_right_list, parent, odd)
 
-    copyToParent(copyElem, parent, newLeftLeaf['page'], npage, rel, odd)
+    copyElem = new_right_list[0]['key']
+
+    copyToParent(copyElem, parent, leftleaf['page'], npage, rel, odd)
     return
 
 
 def copyToParent(elem, parent, ln, rn, rel, odd):
-    inode = read('../data/'+rel+'/'+parent)
-    nodeitem = {}
-    nodeitem['key'] = elem
-    nodeitem['leftNode'] = ln
-    nodeitem['rightNode'] = rn
-    insertininternalnode(inode, nodeitem, odd, rel)
+    pdb.set_trace()
+    if(parent == ""):
+        print('create internal node')
+        nodeitem={};
+        nodeitem['key'] = elem
+        nodeitem['leftNode'] = ln
+        nodeitem['rightNode'] = rn
+        parentpage = createInternalNode([nodeitem], parent, odd)
+        leftleaf = read('../index/'+ln)
+        leftleaf['parent'] = parentpage
+        write(leftleaf,'../index/'+ln)
+        rightleaf = read('../index/'+rn)
+        rightleaf['parent'] = parentpage
+        write(rightleaf,'../index/'+rn)
+
+        directoryelem = read("../index/directory.txt")
+        for item in directoryelem:
+            if(item[0]==relation and item[1]==attribute):
+                item[2] = parentpage
+        write(directoryelem,"../index/directory.txt")
+        #change the rootpage in directory
+    else:
+        inode = read('../index/'+parent)
+        nodeitem = {}
+        nodeitem['key'] = elem
+        nodeitem['leftNode'] = ln
+        nodeitem['rightNode'] = rn
+        insertininternalnode(inode, nodeitem,ln,rn, odd, rel)
     return
 
 
@@ -211,4 +284,4 @@ def write(text, page):
         json.dump(text, f)
 
 
-build('Products', 'pid', 1)
+build('Testproduct', 'pid', 1)

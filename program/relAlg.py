@@ -1,6 +1,10 @@
 import json
+import os
 from buildTree import findInTree
 
+def write(text, page):
+    with open(page, 'w') as f:
+        json.dump(text, f)
 
 def read(path):
     f = open(path)
@@ -16,7 +20,7 @@ def findLocationOfAtrrInTupple(rel, att):
 
 def check_if_use_B_tree(rel, att, val):
     # write a function to check if using B+ tree or
-    leafNodeReturn = json.loads( findInTree(rel, att, val))
+    leafNodeReturn = findInTree(rel, att, val)
     leafNode = leafNodeReturn['page']
     if(leafNode == ''):
         return False
@@ -70,7 +74,51 @@ def select(rel, att, op, val):
 
 #
 def project(rel, attList):
-    print(rel+' att- '+rel+' op->'+attList)
+    posarray: list = []
+    for item in attList:
+        posarray.append(findLocationOfAtrrInTupple(rel, item))
+    path = "../data/"+rel+"/tmp"
+    cost = 0
+    if(len(posarray) == len(attList)):
+        os.mkdir(path)
+    else:
+        return;
+    pagelink = "../data/"+rel+"/pageLink.txt"
+    pageArray = read(pagelink)
+    tempfiledata = []
+    for i in range(len(pageArray)):
+        pagedata = read("../data/"+rel+"/"+pageArray[i])
+        cost = cost + 1
+        for j in range(len(pagedata)):
+            Tuples = pagedata[j]
+            valuefortemp =[]
+            for k in range(len(posarray)):
+                valuefortemp.append(Tuples[posarray[k]])
+            tempfiledata.append(valuefortemp)
+    
+    tempall=[]
+    for x in range(0, len(tempfiledata), 2):
+        
+        pagepool = read("../data/pagePool.txt")
+        lpage = pagepool.pop()
+        write(pagepool,"../data/pagePool.txt")
+        cost += 1
+        tempFile=[]
+        tempFile.append(tempfiledata[x])
+        if(x+1 <= len(tempfiledata)):
+            tempFile.append(tempfiledata[x+1])
+        write(tempFile,"../data/"+rel+"/tmp/"+lpage)
+        tempall.append(tempFile)
+
+    for item in tempall:
+        print(item)
+
+    for item in tempall:
+        for 
+
+    print(' cost->  '+str(cost) )
+
+    return;
 
 
 def join(rel1, att1, rel2, att2):
@@ -80,10 +128,9 @@ def join(rel1, att1, rel2, att2):
     print("att2" + att2)
 
 
-# """use this command after debug"""
-# main()
-# select("Products", "pname", "=", "drill")
-select("Supply", 'pid', '=', 'p23')
+
+# select("Supply", 'pid', '=', 'p23')
+project("Products",["pid","pname"])
 #output > array[['p03','drill','black'],['p05','drill','green']]
 # select("Products", "pid", "=", "p05")
 #output > array [['p05','drill','green']]
