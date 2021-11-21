@@ -1,1 +1,0 @@
-[["p11", "monitor", "black"], ["p12", "switch", "yellow"]]

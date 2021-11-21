@@ -1,1 +1,0 @@
-[["p05", "vacuum", "black"], ["p06", "air conditioner", "pink"]]

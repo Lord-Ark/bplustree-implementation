@@ -21,7 +21,7 @@ def findLocationOfAtrrInTupple(rel, att):
 
 
 def build(rel, att, odd):
-    pdb.set_trace()
+    # pdb.set_trace()
     global relation
     relation = rel
     global order
@@ -47,7 +47,6 @@ def build(rel, att, odd):
                 npage = createLeafNode([nodeitem], '', odd)
                 direcmain = read("../index/directory.txt")
                 direcmain.append([rel, att, npage])
-                print(direcmain)
                 # insert tree in directory
                 write(direcmain, "../index/directory.txt")
             else:
@@ -56,18 +55,17 @@ def build(rel, att, odd):
                 if len(newleaf['nodevalue']) > (2*odd):  # if leaf node is full
                     splittheleaf(newleaf, odd, rel)
                 else:
-                    print('writing in leaf')
                     write(newleaf, "../index/"+newleaf['page'])
 
     return
 
 
 def traverseInTree(pno, sk, traverseCost):
-    pdb.set_trace()
+    # pdb.set_trace()
     page = read("../index/"+pno)
     traverseCost = traverseCost+1
     if(page['type'] == 'L'):
-        return page
+        return {'page': page,'cost':traverseCost}
     else:
         allval = page['nodevalue']
         for i in range(len(allval)):
@@ -78,7 +76,7 @@ def traverseInTree(pno, sk, traverseCost):
 
 
 def findInTree(rel, att, sk):
-    pdb.set_trace()
+    # pdb.set_trace()
     direc = read("../index/directory.txt")
     rootpage = ''
     traverseCost = 0    #not working
@@ -86,15 +84,14 @@ def findInTree(rel, att, sk):
         if(item[0] == rel and item[1] == att):
             rootpage = item[2]
     if(rootpage != ''):
-        page = traverseInTree(rootpage, sk, traverseCost)
-        print(page)
-        return {'page': page, 'cost': traverseCost}
+        result = traverseInTree(rootpage, sk, traverseCost)
+        return {'page': result['page'], 'cost': result['cost']}
     else:
         return {"page": rootpage, "cost": traverseCost}
 
 
 def findKeyInNode(node, sk):
-    pdb.set_trace()
+    # # pdb.set_trace()
     for nodeitem in node['nodevalue']:
         if(nodeitem['key'] == sk):
             return True
@@ -102,20 +99,16 @@ def findKeyInNode(node, sk):
 
 
 def insertinleafnode(leafNodeData, sk, skval):
-    pdb.set_trace()
+    # pdb.set_trace()
     node = leafNodeData
     if(findKeyInNode(node, sk)):
-       # node['key']
-        print('append in value ')
         # append value in the array where key = sk
+        for nodeitem in node['nodevalue']:
+            if(nodeitem['key'] == sk):
+                nodeitem['value'].append(skval)
 
-        # tempnode ={}
-        # tempnode['key'] = sk
-        # tempnode['value'] = skval
-        # # node.
-        # node.append(tempnode)
     else:
-        print('insert in node')
+        # insert in node
         tempnode = {}
         tempnode['key'] = sk
         tempnode['value'] = [skval]
@@ -128,8 +121,9 @@ def insertinleafnode(leafNodeData, sk, skval):
 
 
 def insertininternalnode(internalnode, nodeitem,ln,rn, odd, rel):
-    pdb.set_trace()
+    # pdb.set_trace()
     node = internalnode
+    # sort the nodevalue
     node['nodevalue'].append(nodeitem)
     node['nodevalue'].sort(key=lambda x: x['key'])
     leftleaf = read('../index/'+ln)
@@ -138,9 +132,8 @@ def insertininternalnode(internalnode, nodeitem,ln,rn, odd, rel):
     rightleaf = read('../index/'+rn)
     rightleaf['parent'] = node['page']
     write(rightleaf,'../index/'+rn)
-    # sort the nodevalue
+    
     if(len(node['nodevalue']) > (2*odd)):
-        print('split internal node')
         # split the internal node
         source_list = node['nodevalue']
         N = odd
@@ -163,7 +156,7 @@ def insertininternalnode(internalnode, nodeitem,ln,rn, odd, rel):
 
         npage = createInternalNode(new_right_list, parent, odd)
 
-        copyToParent(new_right_list[0]['key'], parent,node['page'], npage, rel, odd)
+        copyToParent(source_list[N]['key'], parent,node['page'], npage, rel, odd)
     else:
         write(node, "../index/"+node['page'])
 
@@ -171,12 +164,11 @@ def insertininternalnode(internalnode, nodeitem,ln,rn, odd, rel):
 
 
 def createLeafNode(leafitems, parent, odd):
-    pdb.set_trace()
+    # pdb.set_trace()
     pagepool = read("../index/pagePool.txt")
     lpage = pagepool.pop()
     write(pagepool,"../index/pagePool.txt")
     nodep = {}
-    print('new leaf')
     nodep['page'] = lpage
     nodep['parent'] = parent
     nodep['type'] = 'L'
@@ -187,19 +179,17 @@ def createLeafNode(leafitems, parent, odd):
         node['value'] = item['value']
         nodep['nodevalue'].append(node)
     # create a leaf node and write the lpage in the indexfolder
-    # newnode = json.dumps(nodep)
     write(nodep, "../index/"+lpage)
     return lpage
     # create a internal node and write the lpage in the indexfolder
 
 
 def createInternalNode(nodeitems, parent, odd):
-    pdb.set_trace()
+    # pdb.set_trace()
     pagepool = read("../index/pagePool.txt")
     lpage = pagepool.pop()
     write(pagepool,"../index/pagePool.txt")
     nodep = {}
-    print('new internal node')
     nodep['page'] = lpage
     nodep['parent'] = parent
     nodep['type'] = 'I'
@@ -207,18 +197,23 @@ def createInternalNode(nodeitems, parent, odd):
     for item in nodeitems:
         node = {}
         node['leftNode'] = item['leftNode']
+        # change the parent of the leaf nodes
+        leftNode = read("../index/"+item['leftNode'])
+        leftNode['parent']=lpage
+        write(leftNode,"../index/"+item['leftNode'])
         node['rightNode'] = item['rightNode']
+        rightNode = read("../index/"+item['rightNode'])
+        rightNode['parent']=lpage
+        write(rightNode,"../index/"+item['rightNode'])
         node['key'] = item['key']
         nodep['nodevalue'].append(node)
-    # newnode = json.dumps(nodep)
     write(nodep, "../index/"+lpage)
     return lpage
 
 
 def splittheleaf(leafNode, odd, rel):
-    #
-    # lstodd = odd+1
-    pdb.set_trace()
+
+    # pdb.set_trace()
     source_list = leafNode['nodevalue']
     N = odd
     new_left_list = []
@@ -231,14 +226,13 @@ def splittheleaf(leafNode, odd, rel):
     parent = leafNode['parent']
 
     leftleaf ={};
-    leftleaf['parent'] = leafNode['parent']
     leftleaf['page']=leafNode['page']
+    leftleaf['parent'] = leafNode['parent']
     leftleaf['type'] ='L'
     leftleaf['nodevalue']= new_left_list
     
     write(leftleaf, "../index/"+leftleaf['page'])
 
-    # rightleaf = leafNode['nodevalue'][-lstodd:]
     npage = createLeafNode(new_right_list, parent, odd)
 
     copyElem = new_right_list[0]['key']
@@ -248,9 +242,8 @@ def splittheleaf(leafNode, odd, rel):
 
 
 def copyToParent(elem, parent, ln, rn, rel, odd):
-    pdb.set_trace()
+    # pdb.set_trace()
     if(parent == ""):
-        print('create internal node')
         nodeitem={};
         nodeitem['key'] = elem
         nodeitem['leftNode'] = ln
@@ -284,4 +277,4 @@ def write(text, page):
         json.dump(text, f)
 
 
-build('Testproduct', 'pid', 1)
+# build('Testsuppliers', 'sid', 2)

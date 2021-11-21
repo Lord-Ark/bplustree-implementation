@@ -1,1 +1,0 @@
-[["p27", "kettle", "maroon"], ["p28", "brush", "orange"]]
