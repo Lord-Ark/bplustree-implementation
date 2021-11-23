@@ -55,7 +55,7 @@ def build(rel, att, odd):
                 nodeitem = {}
                 nodeitem['key'] = sk
                 nodeitem['value'] = [skval]
-                npage = createLeafNode([nodeitem], '', odd)
+                npage = createLeafNode([nodeitem], '',{'left':'','right':''}, odd)
                 direcmain = read("../index/directory.txt")
                 direcmain.append([rel, att, npage])
                 # insert tree in directory
@@ -174,7 +174,7 @@ def insertininternalnode(internalnode, nodeitem,ln,rn, odd, rel):
     return node
 
 
-def createLeafNode(leafitems, parent, odd):
+def createLeafNode(leafitems, parent, siblings, odd):
     # pdb.set_trace()
     pagepool = read("../index/pagePool.txt")
     lpage = pagepool.pop()
@@ -184,6 +184,13 @@ def createLeafNode(leafitems, parent, odd):
     nodep['parent'] = parent
     nodep['type'] = 'L'
     nodep['nodevalue'] = []
+    if(siblings):
+        nodep['leftSibiling'] = siblings['left']
+        nodep['rightSibiling'] = siblings['right']
+    else:
+        nodep['leftSibiling'] = ''
+        nodep['rightSibiling'] = ''
+
     for item in leafitems:
         node = {}
         node['key'] = item['key']
@@ -241,10 +248,14 @@ def splittheleaf(leafNode, odd, rel):
     leftleaf['parent'] = leafNode['parent']
     leftleaf['type'] ='L'
     leftleaf['nodevalue']= new_left_list
+    leftleaf['leftSibiling'] = leafNode['leftSibiling']
     
+    npage = createLeafNode(new_right_list, parent,{'left':leftleaf['page'],'right': ''}, odd)
+    
+    leftleaf['rightSibiling'] = npage
     write(leftleaf, "../index/"+leftleaf['page'])
 
-    npage = createLeafNode(new_right_list, parent, odd)
+    
 
     copyElem = new_right_list[0]['key']
 

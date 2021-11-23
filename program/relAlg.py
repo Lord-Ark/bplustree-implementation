@@ -38,7 +38,13 @@ def select(rel, att, op, val):
     array: list = []
     pos = findLocationOfAtrrInTupple(rel, att)
     cost = 0
-
+    
+    relationName = 'Select-'+rel+'-'+att
+    if(os.path.isdir('../data/'+relationName)):
+        removeTable(relationName)
+        # delete the directory and free the page pool
+    else:
+        os.mkdir('../data/'+relationName)
     # check for the invalid arguments here using function
     findtreeoutput = findInBtree(rel, att, val)
 
@@ -115,13 +121,7 @@ def select(rel, att, op, val):
         print("Without B+_tree the cost of searching '" + att +
               " " + op+" "+val+"' on "+rel+" is "+str(cost)+" pages")
 
-        
-    relationName = 'Select-'+rel+'-'+att
-    if(os.path.isdir('../data/'+relationName)):
-        removeTable(relationName)
-        # delete the directory and free the page pool
-    else:
-        os.mkdir('../data/'+relationName)
+    
     
     pagelink = []
     for x in range(0, len(array), 2):
@@ -150,7 +150,7 @@ def select(rel, att, op, val):
                 schema.append(schemaitem)
                 write(schema, "../data/schemas.txt")
     
-    print(relationName)
+    # print(relationName)
     return relationName
 
 #
@@ -160,6 +160,18 @@ def project(rel, attList):
         posarray.append(findLocationOfAtrrInTupple(rel, item))
     path = "../data/"+rel+"/tmp"
     cost = 0
+
+    relationName = 'Projection'
+    for atts in attList:
+        relationName = relationName+'-'+atts
+    relationName = relationName +'-'+rel
+
+    if(os.path.isdir('../data/'+relationName)):
+        removeTable(relationName)
+        # delete the directory and free the page pool
+    else:
+        os.mkdir('../data/'+relationName)
+
     if(len(posarray) == len(attList)):
         os.mkdir(path)
         # only make directory if it doesn't exist
@@ -217,17 +229,6 @@ def project(rel, attList):
     for item in resultArray:
         resultItems = resultItems + item
     
-
-    relationName = 'Projection'
-    for atts in attList:
-        relationName = relationName+'-'+atts
-    relationName = relationName +'-'+rel
-
-    if(os.path.isdir('../data/'+relationName)):
-        removeTable(relationName)
-        # delete the directory and free the page pool
-    else:
-        os.mkdir('../data/'+relationName)
     
     pagelink = []
     for x in range(0, len(resultItems), 2):
@@ -271,7 +272,7 @@ def project(rel, attList):
     os.remove("../data/"+rel+"/tmp/pageLink.txt")
     os.rmdir("../data/"+rel+"/tmp")
 
-    print(' Cost of projection  '+str(cost))
+    # print(' Cost of projection  '+str(cost))
 
     return relationName
 
@@ -310,6 +311,13 @@ def join(rel1, att1, rel2, att2):
         innerAtt = att1
         outerAtt = att2
 
+    relationName = 'Join-'+outerRel+'-'+innerRel
+    if(os.path.isdir('../data/'+relationName)):
+        removeTable(relationName)
+        print('deleting the existing directory'+ relationName+ 'and free the page pool')
+    else:
+        os.mkdir('../data/'+relationName)
+
     if(btreeAvailable):
         # outer loop on rel without btree and inner loop on rel with btree
         pagelinkRel = "../data/"+outerRel+"/pageLink.txt"
@@ -343,11 +351,9 @@ def join(rel1, att1, rel2, att2):
                                 for x in range(len(tupleInner)):
                                     if(x != int(innerRelPos) ):
                                         resultitem.append(tupleInner[x])
-                                resultarray.push(resultitem)
+                                resultarray.append(resultitem)
 
-        # resultExplanation = 'Query result of Joining '+ rel1 +' on '+ att1+' and '+rel2+' on '+ att1+' is :'+'\n'
-        # appendInQueryResult(resultExplanation , resultarray,"../queryOutput/queryResult.txt")
-        # return resultarray
+        print('Cost of Joining '+rel1+' and '+rel2+' with B+ tree on '+innerRel+' is '+ str(cost)+ ' I/Os')
     else:
         pagelinkRel1 = "../data/"+outerRel+"/pageLink.txt"
         pageArrayRel1 = read(pagelinkRel1)
@@ -379,15 +385,8 @@ def join(rel1, att1, rel2, att2):
         for item in resultarray:  # what to do with the result
             print(item)
 
-        print(cost)
-        # resultExplanation = 'Query result of Joining '+ rel1 +' on '+ att1+' and '+rel2+' on '+ att1+' is :'+'\n'
-        # appendInQueryResult(resultExplanation, resultarray,"../queryOutput/queryResult.txt")
-        # return resultarray
-    relationName = 'Join-'+outerRel+'-'+innerRel
-    # for atts in attList:
-    #     relationName = relationName+'-'+atts
-    # relationName = relationName +'-'+rel
-
+        print('Cost of Joining '+rel1+' and '+rel2+' without B+ tree is '+ str(cost)+ ' I/Os')
+    
     schema = read("../data/schemas.txt")
     if(schema):
         position = 0
@@ -413,12 +412,6 @@ def join(rel1, att1, rel2, att2):
                     schema.append(schemaitem)
     
     write(schema, "../data/schemas.txt")
-
-    if(os.path.isdir('../data/'+relationName)):
-        removeTable(relationName)
-        # delete the directory and free the page pool
-    else:
-        os.mkdir('../data/'+relationName)
     
     pagelink = []
     for x in range(0, len(resultarray), 2):
@@ -435,6 +428,7 @@ def join(rel1, att1, rel2, att2):
 
     write(pagelink,"../data/"+relationName+"/pageLink.txt")
 
+    return relationName
 
 # join('Suppliers','sid','Supply','sid')
 # select("Testsuppliers", 'sid', '=', 's10')

@@ -1,6 +1,7 @@
 
 from buildTree import read
 from buildTree import write
+import json
 
 def traverseAllNode(rootpage):
     resultArray = []
@@ -39,6 +40,25 @@ def displayTree(filename):
             f.write(str(item))
             f.write('\n')
         f.close()
-            
 
-# displayTree('pg08.txt')
+def displayTable(relName):
+    if(relName!= ''):
+        pagelink = "../data/"+relName+"/pageLink.txt"
+        pageArray = read(pagelink)          
+
+        results=[]
+        for pages in pageArray:
+            pageitem = read("../data/"+relName+"/"+pages)
+            results.append(pageitem)
+        
+        page = "../queryOutput/queryResult.txt"
+        with open(page, 'a') as f:
+            f.write('\n')
+            for item in results:
+                json.dump(item, f)
+                f.write("\n")
+            f.write("\n\n\n")
+            f.write("------------------------------------------------------------")
+            f.write("\n")
+
+# displayTree('pg30.txt')

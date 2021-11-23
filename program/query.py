@@ -1,6 +1,7 @@
 from remove import removeTree,removeTable
 from relAlg import project,select,join
 from buildTree import build
+from display import displayTable
 import json
 import os
 
@@ -13,16 +14,6 @@ def read(path):
         return json.load(f)
     except:
         return
-
-def appendInQueryResult(resultexplanation, results):
-    page = "../queryOutput/queryResult.txt"
-    with open(page, 'a') as f:
-        f.write(resultexplanation)
-        f.write('\n')
-        json.dump(results, f)
-        f.write("\n\n\n")
-        f.write("------------------------------------------------------------")
-        f.write("\n")
 
 def main():
     funcName = input(
@@ -59,20 +50,15 @@ def question1():
     
     selectionRelName = select(relation, 'sid','=',supplierval)
 
+    global selectoutputquestion1                # writing the value of select relation in the global variable
+    selectoutputquestion1 = selectionRelName
+
     outputrel = project(selectionRelName,outputAttlist)
 
-    global outputrelquestion1
+    global outputrelquestion1                   #  writing the value of project relation in the global variable
     outputrelquestion1 = outputrel
-    pagelink = "../data/"+outputrel+"/pageLink.txt"
-    pageArray = read(pagelink)
-    
-    results=[]
-    for pages in pageArray:
-        pageitem = read("../data/"+outputrel+"/"+pages)
-        results.append(pageitem)
 
-    resultExplanation = 'Query result of => The name for the supplier where sid is "s23" with B+tree \n'
-    appendInQueryResult(resultExplanation,results)
+    displayTable(outputrel)
 
     return
 
@@ -94,17 +80,55 @@ def question2():
 
     outputrel = project(selectionRelName,outputAttlist)
 
-    pagelink = "../data/"+outputrel+"/pageLink.txt"
-    pageArray = read(pagelink)
-    
-    results=[]
-    for pages in pageArray:
-        pageitem = read("../data/"+outputrel+"/"+pages)
-        results.append(pageitem)
-
-    resultExplanation = 'Query result of => The name for the supplier where sid is "s23" without B+tree \n'
-    appendInQueryResult(resultExplanation,results)
+    displayTable(outputrel)
     
     return
 
-# question2()
+def question3():
+    # Find the address of the suppliers who supplied ‘p15’.
+    
+    build('Suppliers', 'sid', 2)
+    build('Supply', 'pid', 2)
+
+    selectOutputRel = select('Supply','pid','=','p15')
+
+    joinrelName = join(selectOutputRel,'sid','Suppliers','sid')
+    
+    outputrel = project(joinrelName,['address'])
+
+    displayTable(outputrel)
+
+    return 
+
+def question4():
+    # What is the cost of ‘p20’ supplied by ‘Kiddie’?
+
+    selectsupplyoutput = select('Supply','pid','=','p20')
+
+    selectsuppliersoutput = select('Suppliers','sname','=','Kiddie')
+
+    joinresult = join(selectsupplyoutput,'sid',selectsuppliersoutput,'sid')
+
+    projectresult = project(joinresult,['cost'])
+
+    displayTable(projectresult)
+
+    return
+
+def question5():
+
+    # For each supplier who supplied products with a cost of 47 or higher, list his/her name, product name and the cost.
+
+    selectcostsupply = select('Supply','cost','>=',47)
+
+    joinresult = join('Suppliers','sid',selectcostsupply,'sid')
+
+    doublejoinresult = join('Products','pid',joinresult,'pid')
+
+    outputresult = project(doublejoinresult,['sname','pname','cost'])
+
+    displayTable(outputresult)
+    
+    return
+
+question3()
