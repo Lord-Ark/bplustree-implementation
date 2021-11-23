@@ -19,9 +19,20 @@ def findLocationOfAtrrInTupple(rel, att):
         if (item[0] == str.capitalize(rel) and item[1] == att):
             return item[3]
 
+def checkBtreeOnRelAndAtt(rel,att):
+    direc = read("../index/directory.txt")
+    rootpage = ''  
+    for item in direc:
+        if(item[0] == rel and item[1] == att):
+            rootpage = item[2]
+    return rootpage
 
 def build(rel, att, odd):
     # pdb.set_trace()
+    if(checkBtreeOnRelAndAtt(rel,att) != ''):
+        print('B+ tree on <'+rel+','+att+'> already exist')
+        return 
+        
     global relation
     relation = rel
     global order
@@ -277,4 +288,4 @@ def write(text, page):
         json.dump(text, f)
 
 
-# build('Testsuppliers', 'sid', 2)
+# build('Supply', 'pid', 2)

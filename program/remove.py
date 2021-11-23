@@ -7,7 +7,6 @@ def write(text, page):
     with open(page, 'w') as f:
         json.dump(text, f)
 
-
 def read(path):
     f = open(path)
     return json.load(f)
@@ -42,7 +41,36 @@ def removeTree(rel, att):
         print(len(allitem))
     return;
 
+def removeTable(rel):
 
+    if(os.path.isdir('../data/'+rel)):     
+        pagelink = read("../data/"+rel+"/pageLink.txt")
+        
+        # remove pages from rel and add in pagepool
+        pagepool = read("../data/pagePool.txt")        
+        for pageno in pagelink:
+            os.remove("../data/"+rel+"/"+pageno)
+            pagepool.append(pageno)
+            write(pagepool,"../data/pagePool.txt")
+        
+        
+        #remove from schema
+        schema = read("../data/schemas.txt")
+        newschema = list(schema)
+        if(schema):
+            for item in schema:
+                if (item[0] == rel):
+                    newschema.remove(item)
+            
+            write(newschema, "../data/schemas.txt")
 
+        os.remove("../data/"+rel+"/pageLink.txt")
+        os.rmdir("../data/"+rel)
+    else:
+        print('No such Table found as '+ rel)
 
-removeTree('Testsuppliers', 'sid')
+    
+
+# removeTree("Supply", "pid")
+# removeTable('Join-Suppliers-Supply')
+# removeTable('Projection-sname-Select-Suppliers-sid')
