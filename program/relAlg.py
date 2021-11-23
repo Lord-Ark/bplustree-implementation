@@ -3,6 +3,7 @@ import os
 from buildTree import findInTree, checkBtreeOnRelAndAtt
 from remove import removeTable
 
+
 def write(text, page):
     with open(page, 'w') as f:
         json.dump(text, f)
@@ -38,13 +39,12 @@ def select(rel, att, op, val):
     array: list = []
     pos = findLocationOfAtrrInTupple(rel, att)
     cost = 0
-    
+
     relationName = 'Select-'+rel+'-'+att
     if(os.path.isdir('../data/'+relationName)):
         removeTable(relationName)
         # delete the directory and free the page pool
-    else:
-        os.mkdir('../data/'+relationName)
+
     # check for the invalid arguments here using function
     findtreeoutput = findInBtree(rel, att, val)
 
@@ -82,10 +82,9 @@ def select(rel, att, op, val):
         #     print(item)
         # resultexplanation = 'Result \n'
         # appendInQueryResult(resultexplanation, array,"../queryOutput/queryResult.txt")
-        
 
         print("With B+_tree, the cost of searching "+att+" " +
-              op+" "+val+" on "+rel + " is " + str(cost)+"  pages")
+              op+" " + str(val) + " on "+rel + " is " + str(cost)+"  pages")
 
     else:
         pagelink = "../data/"+rel+"/pageLink.txt"
@@ -116,13 +115,13 @@ def select(rel, att, op, val):
         #     print(item)
         # resultexplanation = 'Result \n'
         # appendInQueryResult(resultexplanation, array,"../queryOutput/queryResult.txt")
-        
 
         print("Without B+_tree the cost of searching '" + att +
-              " " + op+" "+val+"' on "+rel+" is "+str(cost)+" pages")
+              " " + op+" "+str(val)+"' on "+rel+" is "+str(cost)+" pages")
 
-    
-    
+    if(not os.path.isdir('../data/'+relationName)):
+        os.mkdir('../data/'+relationName)
+
     pagelink = []
     for x in range(0, len(array), 2):
         pagepool = read("../data/pagePool.txt")
@@ -135,8 +134,8 @@ def select(rel, att, op, val):
             tempFile.append(array[x+1])
         write(tempFile, "../data/"+relationName+"/"+lpage)
         pagelink.append(lpage)
-    
-    write(pagelink,"../data/"+relationName+"/pageLink.txt")
+
+    write(pagelink, "../data/"+relationName+"/pageLink.txt")
     # schemaarray = []
     schema = read("../data/schemas.txt")
     if(schema):
@@ -146,14 +145,16 @@ def select(rel, att, op, val):
                 schemaitem.append(relationName)
                 schemaitem.append(item[1])
                 schemaitem.append(item[2])
-                schemaitem.append(item[3]) 
+                schemaitem.append(item[3])
                 schema.append(schemaitem)
                 write(schema, "../data/schemas.txt")
-    
+
     # print(relationName)
     return relationName
 
 #
+
+
 def project(rel, attList):
     posarray: list = []
     for item in attList:
@@ -164,13 +165,11 @@ def project(rel, attList):
     relationName = 'Projection'
     for atts in attList:
         relationName = relationName+'-'+atts
-    relationName = relationName +'-'+rel
+    relationName = relationName + '-'+rel
 
     if(os.path.isdir('../data/'+relationName)):
         removeTable(relationName)
         # delete the directory and free the page pool
-    else:
-        os.mkdir('../data/'+relationName)
 
     if(len(posarray) == len(attList)):
         os.mkdir(path)
@@ -206,7 +205,7 @@ def project(rel, attList):
         tempallpages.append(lpage)
         tempall.append(tempFile)
 
-    write(tempallpages,"../data/"+rel+"/tmp/pageLink.txt")
+    write(tempallpages, "../data/"+rel+"/tmp/pageLink.txt")
 
     resultArray = []
     for a in range(len(tempallpages)):
@@ -228,8 +227,10 @@ def project(rel, attList):
     resultItems = []
     for item in resultArray:
         resultItems = resultItems + item
-    
-    
+
+    if(not os.path.isdir('../data/'+relationName)):
+        os.mkdir('../data/'+relationName)
+
     pagelink = []
     for x in range(0, len(resultItems), 2):
         pagepool = read("../data/pagePool.txt")
@@ -243,7 +244,7 @@ def project(rel, attList):
         write(tempFile, "../data/"+relationName+"/"+lpage)
         pagelink.append(lpage)
 
-    write(pagelink,"../data/"+relationName+"/pageLink.txt")
+    write(pagelink, "../data/"+relationName+"/pageLink.txt")
 
     schema = read("../data/schemas.txt")
     if(schema):
@@ -254,21 +255,21 @@ def project(rel, attList):
                     schemaitem.append(relationName)
                     schemaitem.append(item[1])
                     schemaitem.append(item[2])
-                    schemaitem.append(item[3]) 
+                    schemaitem.append(item[3])
                     schema.append(schemaitem)
-    
+
     write(schema, "../data/schemas.txt")
 
-    # Remove Temp files 
+    # Remove Temp files
     pagelink = read("../data/"+rel+"/tmp/pageLink.txt")
-    
+
     # remove pages from rel and add in pagepool
-    pagepool = read("../data/pagePool.txt")        
+    pagepool = read("../data/pagePool.txt")
     for pageno in pagelink:
         os.remove("../data/"+rel+"/tmp/"+pageno)
         pagepool.append(pageno)
 
-    write(pagepool,"../data/pagePool.txt") 
+    write(pagepool, "../data/pagePool.txt")
     os.remove("../data/"+rel+"/tmp/pageLink.txt")
     os.rmdir("../data/"+rel+"/tmp")
 
@@ -290,7 +291,7 @@ def join(rel1, att1, rel2, att2):
     innerRelPos = posatt2
     btreeAvailable = False
     btreeOn = ''
-    
+
     rootRel1 = checkBtreeOnRelAndAtt(rel1, att1)
     if(rootRel1 == ''):
         rootRel2 = checkBtreeOnRelAndAtt(rel2, att2)
@@ -314,9 +315,8 @@ def join(rel1, att1, rel2, att2):
     relationName = 'Join-'+outerRel+'-'+innerRel
     if(os.path.isdir('../data/'+relationName)):
         removeTable(relationName)
-        print('deleting the existing directory'+ relationName+ 'and free the page pool')
-    else:
-        os.mkdir('../data/'+relationName)
+        print('deleting the existing directory' +
+              relationName + 'and free the page pool')
 
     if(btreeAvailable):
         # outer loop on rel without btree and inner loop on rel with btree
@@ -345,15 +345,16 @@ def join(rel1, att1, rel2, att2):
                         for tupleInner in pagedataInner:
                             valueforcom = tupleInner[innerRelPos]
                             if(valueRelOuter == valueforcom):
-                                resultitem=[]
+                                resultitem = []
                                 for val in tupleouter:
                                     resultitem.append(val)
                                 for x in range(len(tupleInner)):
-                                    if(x != int(innerRelPos) ):
+                                    if(x != int(innerRelPos)):
                                         resultitem.append(tupleInner[x])
                                 resultarray.append(resultitem)
 
-        print('Cost of Joining '+rel1+' and '+rel2+' with B+ tree on '+innerRel+' is '+ str(cost)+ ' I/Os')
+        print('Cost of Joining '+rel1+' and '+rel2 +
+              ' with B+ tree on '+innerRel+' is ' + str(cost) + ' I/Os')
     else:
         pagelinkRel1 = "../data/"+outerRel+"/pageLink.txt"
         pageArrayRel1 = read(pagelinkRel1)
@@ -370,23 +371,25 @@ def join(rel1, att1, rel2, att2):
                     for TupleRel2 in pagedataRel2:
                         valueRel2 = TupleRel2[posatt2]
                         if(valueRel1 == valueRel2):
-                            resultitem=[]
+                            resultitem = []
                             for val in TupleRel1:
                                 resultitem.append(val)
                             # resultitem = resultitem + TupleRel1
                             for x in range(len(TupleRel2)):
-                                if(x != int(innerRelPos) ):
+                                if(x != int(innerRelPos)):
                                     resultitem.append(TupleRel2[x])
                             # in_first_tup = set(TupleRel1)
                             # in_second_tup = set(TupleRel2)
                             # in_second_but_not_in_first = in_second_tup - in_first_tup
                             resultarray.append(resultitem)
 
-        for item in resultarray:  # what to do with the result
-            print(item)
 
-        print('Cost of Joining '+rel1+' and '+rel2+' without B+ tree is '+ str(cost)+ ' I/Os')
-    
+        print('Cost of Joining '+rel1+' and '+rel2 +
+              ' without B+ tree is ' + str(cost) + ' I/Os')
+
+    if(not os.path.isdir('../data/'+relationName)):
+        os.mkdir('../data/'+relationName)
+
     schema = read("../data/schemas.txt")
     if(schema):
         position = 0
@@ -397,10 +400,10 @@ def join(rel1, att1, rel2, att2):
                 schemaitem.append(item[1])
                 schemaitem.append(item[2])
                 schemaitem.append(position)
-                position +=1 
+                position += 1
                 schema.append(schemaitem)
 
-        for item in schema:        
+        for item in schema:
             if (item[0] == innerRel):
                 if(item[1] != innerAtt):
                     schemaitem = []
@@ -408,11 +411,11 @@ def join(rel1, att1, rel2, att2):
                     schemaitem.append(item[1])
                     schemaitem.append(item[2])
                     schemaitem.append(position)
-                    position +=1 
+                    position += 1
                     schema.append(schemaitem)
-    
+
     write(schema, "../data/schemas.txt")
-    
+
     pagelink = []
     for x in range(0, len(resultarray), 2):
         pagepool = read("../data/pagePool.txt")
@@ -426,7 +429,7 @@ def join(rel1, att1, rel2, att2):
         write(tempFile, "../data/"+relationName+"/"+lpage)
         pagelink.append(lpage)
 
-    write(pagelink,"../data/"+relationName+"/pageLink.txt")
+    write(pagelink, "../data/"+relationName+"/pageLink.txt")
 
     return relationName
 

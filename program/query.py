@@ -1,5 +1,5 @@
-from remove import removeTree,removeTable
-from relAlg import project,select,join
+from remove import removeTree, removeTable
+from relAlg import project, select, join
 from buildTree import build
 from display import displayTable
 import json
@@ -8,6 +8,7 @@ import os
 outputrelquestion1 = 'Projection-sname-Select-Suppliers-sid'
 selectoutputquestion1 = 'Select-Suppliers-sid'
 
+
 def read(path):
     try:
         f = open(path)
@@ -15,29 +16,25 @@ def read(path):
     except:
         return
 
+
 def main():
     funcName = input(
-        "enter the function(number) you want to call: \n 1. Project \n 2. Select \n 3. Join \n  Enter Number: ")
+        "enter the question (number) you want to call: \n 1. Question 1 : Find the name for the supplier 's23' when a B+_tree exists on Suppliers.sid \n 2. Find the name for the supplier 's23' when a B+_tree does not exists \n 3. Find the address of the suppliers who supplied 'p15'. \n 4. What is the cost of 'p20' supplied by 'Kiddie'?\n 5. For each supplier who supplied products with a cost of 47 or higher, list his/her name, product name and the cost.\n Enter Number: ")
 
     if funcName == '1':
-        relName = input("Enter relation name: ")
-        attList = input("Enter attribute name: ")
-        project(relName, attList)
+        question1()
 
     elif funcName == '2':
-        relName2 = input("Enter relation name: ")
-        attName = input("Enter attribute name: ")
-        opVal = input("Enter operator value: ")
-        val = input("Enter value: ")
-        select(relName2, attName, opVal, val)
+        question2()
 
     elif funcName == '3':
+        question3()
 
-        rel1 = input("Enter relation name1: ")
-        att1 = input("Enter attribute name1: ")
-        rel2 = input("Enter relation name2: ")
-        att2 = input("Enter attribute name2: ")
-        join(rel1, att1, rel2, att2)
+    elif funcName == '4':
+        question4()
+
+    elif funcName == '5':
+        question5()
 
 def question1():
     # Find the name for the supplier ‘s23’ when a B+_tree exists on Suppliers.sid
@@ -47,25 +44,28 @@ def question1():
     supplierval = 's23'
     relation = 'Suppliers'
     outputAttlist = ['sname']
-    
-    selectionRelName = select(relation, 'sid','=',supplierval)
 
-    global selectoutputquestion1                # writing the value of select relation in the global variable
+    selectionRelName = select(relation, 'sid', '=', supplierval)
+
+    # writing the value of select relation in the global variable
+    global selectoutputquestion1
     selectoutputquestion1 = selectionRelName
 
-    outputrel = project(selectionRelName,outputAttlist)
+    outputrel = project(selectionRelName, outputAttlist)
 
-    global outputrelquestion1                   #  writing the value of project relation in the global variable
+    # writing the value of project relation in the global variable
+    global outputrelquestion1
     outputrelquestion1 = outputrel
 
     displayTable(outputrel)
 
     return
 
-def question2():
-    # Find the name for the supplier ‘s23’ when a B+_tree does not exists 
 
-    removeTree('Suppliers','sid')
+def question2():
+    # Find the name for the supplier "s23" when a B+_tree does not exists
+
+    removeTree('Suppliers', 'sid')
 
     if(os.path.isdir('../data/'+outputrelquestion1)):
         removeTable(outputrelquestion1)
@@ -75,60 +75,64 @@ def question2():
     supplierval = 's23'
     relation = 'Suppliers'
     outputAttlist = ['sname']
-    
-    selectionRelName = select(relation, 'sid','=',supplierval)
 
-    outputrel = project(selectionRelName,outputAttlist)
+    selectionRelName = select(relation, 'sid', '=', supplierval)
+
+    outputrel = project(selectionRelName, outputAttlist)
 
     displayTable(outputrel)
-    
+
     return
 
+
 def question3():
-    # Find the address of the suppliers who supplied ‘p15’.
-    
+    # Find the address of the suppliers who supplied 'p15'.
+
     build('Suppliers', 'sid', 2)
     build('Supply', 'pid', 2)
 
-    selectOutputRel = select('Supply','pid','=','p15')
+    selectOutputRel = select('Supply', 'pid', '=', 'p15')
 
-    joinrelName = join(selectOutputRel,'sid','Suppliers','sid')
-    
-    outputrel = project(joinrelName,['address'])
+    joinrelName = join(selectOutputRel, 'sid', 'Suppliers', 'sid')
+
+    outputrel = project(joinrelName, ['address'])
 
     displayTable(outputrel)
 
-    return 
+    return
+
 
 def question4():
-    # What is the cost of ‘p20’ supplied by ‘Kiddie’?
+    # What is the cost of 'p20' supplied by 'Kiddie'?
 
-    selectsupplyoutput = select('Supply','pid','=','p20')
+    selectsupplyoutput = select('Supply', 'pid', '=', 'p20')
 
-    selectsuppliersoutput = select('Suppliers','sname','=','Kiddie')
+    selectsuppliersoutput = select('Suppliers', 'sname', '=', 'Kiddie')
 
-    joinresult = join(selectsupplyoutput,'sid',selectsuppliersoutput,'sid')
+    joinresult = join(selectsupplyoutput, 'sid', selectsuppliersoutput, 'sid')
 
-    projectresult = project(joinresult,['cost'])
+    projectresult = project(joinresult, ['cost'])
 
     displayTable(projectresult)
 
     return
 
+
 def question5():
 
     # For each supplier who supplied products with a cost of 47 or higher, list his/her name, product name and the cost.
 
-    selectcostsupply = select('Supply','cost','>=',47)
+    selectcostsupply = select('Supply', 'cost', '>=', 47)
 
-    joinresult = join('Suppliers','sid',selectcostsupply,'sid')
+    joinresult = join('Suppliers', 'sid', selectcostsupply, 'sid')
 
-    doublejoinresult = join('Products','pid',joinresult,'pid')
+    doublejoinresult = join('Products', 'pid', joinresult, 'pid')
 
-    outputresult = project(doublejoinresult,['sname','pname','cost'])
+    outputresult = project(doublejoinresult, ['sname', 'pname', 'cost'])
 
     displayTable(outputresult)
-    
+
     return
 
-question3()
+
+main()

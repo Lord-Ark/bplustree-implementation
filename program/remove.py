@@ -22,7 +22,6 @@ def removeTree(rel, att):
             write(direc,"../index/directory.txt")
 
     if(rootpage != ''):
-        print('append the value and delete')
         allitem = traverseAllNode(rootpage)
         seen_pages = set()
         new_list = []
@@ -38,7 +37,6 @@ def removeTree(rel, att):
 
         write(pagepool,"../index/pagePool.txt")    
         # traverse all nodes and delete them
-        print(len(allitem))
     return;
 
 def removeTable(rel):
