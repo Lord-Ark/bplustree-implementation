@@ -1,7 +1,7 @@
 from remove import removeTree, removeTable
 from relAlg import project, select, join
 from buildTree import build
-from display import displayTable
+from display import displayTable,displayTree
 import json
 import os
 
@@ -19,7 +19,15 @@ def read(path):
 
 def main():
     funcName = input(
-        "enter the question (number) you want to call: \n 1. Question 1 : Find the name for the supplier 's23' when a B+_tree exists on Suppliers.sid \n 2. Find the name for the supplier 's23' when a B+_tree does not exists \n 3. Find the address of the suppliers who supplied 'p15'. \n 4. What is the cost of 'p20' supplied by 'Kiddie'?\n 5. For each supplier who supplied products with a cost of 47 or higher, list his/her name, product name and the cost.\n Enter Number: ")
+        "Enter the question (number) you want to call: \n "+
+        "1. Find the name for the supplier 's23' when a B+_tree exists on Suppliers.sid \n "+
+        "2. Find the name for the supplier 's23' when a B+_tree does not exists \n "+
+        "3. Find the address of the suppliers who supplied 'p15'. \n "+
+        "4. What is the cost of 'p20' supplied by 'Kiddie'?\n "+
+        "5. For each supplier who supplied products with a cost of 47 or higher, list his/her name, product name and the cost. \n "+
+        "6. Display both trees\n "+
+        "7. Remove all extra tables (directories)\n "+
+        "Enter Number: ")
 
     if funcName == '1':
         question1()
@@ -35,6 +43,12 @@ def main():
 
     elif funcName == '5':
         question5()
+
+    elif funcName == '6':
+        diplayBothTree()
+
+    elif funcName == '7':
+        removeallextratables()
 
 def question1():
     # Find the name for the supplier ‘s23’ when a B+_tree exists on Suppliers.sid
@@ -66,11 +80,6 @@ def question2():
     # Find the name for the supplier "s23" when a B+_tree does not exists
 
     removeTree('Suppliers', 'sid')
-
-    if(os.path.isdir('../data/'+outputrelquestion1)):
-        removeTable(outputrelquestion1)
-    if(os.path.isdir('../data/'+selectoutputquestion1)):
-        removeTable(selectoutputquestion1)
 
     supplierval = 's23'
     relation = 'Suppliers'
@@ -134,5 +143,23 @@ def question5():
 
     return
 
+def diplayBothTree():
+    direc = read("../index/directory.txt")
+    rootpage = ''  
+    for item in direc:
+        rootpage = item[2]
+        displayTree(rootpage)    
+
+    return
+
+def removeallextratables():
+    path = '../data/'
+
+    directory_contents = os.listdir(path)
+    # print(directory_contents)
+    for item in directory_contents:
+        if os.path.isdir(path+item):
+            if(item != 'Suppliers' and item != 'Supply' and item != 'Products'):
+                removeTable(item)
 
 main()

@@ -26,7 +26,6 @@ def traverseAllNode(rootpage):
 
 def displayTree(filename):
     if(filename != ''):
-        print('append the value and delete')
         allitem = traverseAllNode(filename)
         seen_pages = set()
         new_list = []
@@ -34,12 +33,24 @@ def displayTree(filename):
             if obj['page'] not in seen_pages:
                 new_list.append(obj)
                 seen_pages.add(obj['page'])
+       
+        direc = read("../index/directory.txt")
+        treeitem = ''  
+        for item in direc:
+            if(item[2] == filename):
+                treeitem = item
 
-        f = open("../treePic/tree"+filename, "a")
-        for item in new_list:
-            f.write(str(item))
-            f.write('\n')
-        f.close()
+        if(treeitem != ''):
+            f = open("../treePic/"+treeitem[0]+"_"+treeitem[1]+".txt", "w")
+            for item in new_list:
+                if(item['type']=='I' and item['parent'] !=''):
+                    f.write('\t')
+                if(item['type']=='L'):
+                    f.write('\t')
+                    f.write('\t')    
+                f.write(str(item))
+                f.write('\n')
+            f.close()
 
 def displayTable(relName):
     if(relName!= ''):

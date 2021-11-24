@@ -69,6 +69,5 @@ def removeTable(rel):
 
     
 
-# removeTree("Supply", "pid")
-# removeTable('Join-Suppliers-Supply')
-# removeTable('Projection-sname-Select-Suppliers-sid')
+# removeTree("Supply", "pid")       
+# removeTree("Suppliers","sid")

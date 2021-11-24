@@ -363,11 +363,11 @@ def join(rel1, att1, rel2, att2):
         for pageRel1 in pageArrayRel1:
             pagedataRel1 = read("../data/"+outerRel+"/"+pageRel1)
             cost = cost + 1
-            for TupleRel1 in pagedataRel1:
-                valueRel1 = TupleRel1[posatt1]
-                for pageRel2 in pageArrayRel2:
-                    pagedataRel2 = read("../data/"+innerRel+"/"+pageRel2)
-                    cost = cost + 1
+            for pageRel2 in pageArrayRel2:
+                pagedataRel2 = read("../data/"+innerRel+"/"+pageRel2)
+                cost = cost + 1
+                for TupleRel1 in pagedataRel1:
+                    valueRel1 = TupleRel1[posatt1]
                     for TupleRel2 in pagedataRel2:
                         valueRel2 = TupleRel2[posatt2]
                         if(valueRel1 == valueRel2):
