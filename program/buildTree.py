@@ -293,7 +293,26 @@ def copyToParent(elem, parent, ln, rn, rel, odd):
         insertininternalnode(inode, nodeitem,ln,rn, odd, rel)
     return
 
-
+def traverseAllNode(rootpage):
+    resultArray = []
+    # global resultArray
+    root = read("../index/"+rootpage)
+    if(root['type'] == 'L'):
+        # print(root)
+        resultArray.append(root)
+        return resultArray
+    else:
+        resultArray.append(root)
+        # resultArray = resultArray +  append(root)
+        for item in root['nodevalue']:
+            leftArray = traverseAllNode(item['leftNode'])
+            resultArray = resultArray +leftArray
+            # resultArray.append(traverseAllNode(item['leftNode']))
+            rightArray = traverseAllNode(item['rightNode'])
+            resultArray = resultArray +rightArray
+            # resultArray.append(traverseAllNode(item['rightNode']))
+        return resultArray
+        
 def write(text, page):
     with open(page, 'w') as f:
         json.dump(text, f)

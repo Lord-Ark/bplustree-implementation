@@ -1,28 +1,8 @@
 
 from buildTree import read
 from buildTree import write
+from buildTree import traverseAllNode
 import json
-
-def traverseAllNode(rootpage):
-    resultArray = []
-    # global resultArray
-    root = read("../index/"+rootpage)
-    if(root['type'] == 'L'):
-        # print(root)
-        resultArray.append(root)
-        return resultArray
-    else:
-        resultArray.append(root)
-        # resultArray = resultArray +  append(root)
-        for item in root['nodevalue']:
-            leftArray = traverseAllNode(item['leftNode'])
-            resultArray = resultArray +leftArray
-            # resultArray.append(traverseAllNode(item['leftNode']))
-            rightArray = traverseAllNode(item['rightNode'])
-            resultArray = resultArray +rightArray
-            # resultArray.append(traverseAllNode(item['rightNode']))
-        return resultArray
-
 
 def displayTree(filename):
     if(filename != ''):

@@ -1,7 +1,7 @@
 import json
 import pdb
 import os
-from display import traverseAllNode
+from buildTree import traverseAllNode
 
 def write(text, page):
     with open(page, 'w') as f:
