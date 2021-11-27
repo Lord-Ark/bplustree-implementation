@@ -1,4 +1,4 @@
-# bplustree-implementation
+# B+ Tree implementation
 
 This project is the immplementation of a hypothetic database system that consists of the
 simplified versions for three relational algebra operations, select, project and join, a limited form
